@@ -3,9 +3,7 @@ package com.jesusdmedinac.kotlin.algorithms
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,81 +18,63 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
+import java.util.Collections
 import kotlin.random.Random
 
 @Composable
-fun SelectionSort(initialList: List<Int> = emptyList()) {
-    var sortedList by remember {
-        mutableStateOf(emptyList<Int>())
-    }
+fun BubbleSort(initialList: List<Int> = emptyList()) {
     var unsortedList by remember {
         mutableStateOf(initialList)
     }
-    var pointingNumber by remember {
-        mutableStateOf(-1)
+    var sortedList by remember {
+        mutableStateOf(emptyList<Int>())
     }
-    var minNumber by remember {
-        mutableStateOf(-1)
-    }
-    var minNumberIndex by remember {
-        mutableStateOf(-1)
+    var sortingPair by remember {
+        mutableStateOf(0 to 0)
     }
     var operations by remember {
         mutableStateOf(0)
     }
-
-    Text(text = "1.2 Selection Sort", style = MaterialTheme.typography.titleLarge)
+    Text(text = "1.3 Bubble Sort", style = MaterialTheme.typography.titleLarge)
     Text(text = "Operations: $operations", style = MaterialTheme.typography.titleMedium)
     LazyRow {
-        itemsIndexed(
-            listOf(sortedList, unsortedList).flatten(),
-            key = { _, item -> item }) { _, number ->
+        itemsIndexed(listOf(unsortedList, sortedList).flatten(), key = { _, item -> item }) { index, number ->
             val modifier = when {
-                minNumber == number -> Modifier
+                number in unsortedList && (index == sortingPair.first || index == sortingPair.second) -> Modifier
                     .background(Color.Red)
-
                 number in sortedList -> Modifier
                     .border(2.dp, Color.Black)
-
                 else -> Modifier
             }
             RectTextNumber(
-                number,
+                number = number,
                 modifier = modifier
             )
         }
     }
     LaunchedEffect(Unit) {
         while (true) {
-            repeat(initialList.size) {
-                unsortedList.forEachIndexed { index, number ->
-                    pointingNumber = index
-                    when {
-                        minNumber == -1 -> {
-                            minNumber = number
-                            minNumberIndex = index
-                        }
-
-                        number <= minNumber -> {
-                            minNumber = number
-                            minNumberIndex = index
-                        }
+            do {
+                for (index in 0 until unsortedList.size - 1) {
+                    sortingPair = index to index + 1
+                    if (unsortedList[sortingPair.first] >
+                        unsortedList[sortingPair.second]
+                    ) {
+                        Collections.swap(unsortedList, sortingPair.first, sortingPair.second)
                     }
                     operations++
                 }
-                delay(10_000L / initialList.size)
-                sortedList += minNumber
+                sortedList = sortedList
+                    .toMutableList()
+                    .apply { if (unsortedList.isNotEmpty()) add(0, unsortedList.last()) }
                 unsortedList = unsortedList
                     .toMutableList()
-                    .apply {
-                        if (isNotEmpty())
-                            removeAt(minNumberIndex)
-                    }
-                pointingNumber = -1
-                minNumber = -1
+                    .apply { if (unsortedList.isNotEmpty()) removeLast() }
+                delay(10_000L / initialList.size)
                 operations++
-            }
+            } while (sortedList.size < initialList.size)
             delay(3000)
+            sortingPair = 0 to 0
             sortedList = emptyList()
             unsortedList = initialList
             operations = 0
@@ -104,8 +84,8 @@ fun SelectionSort(initialList: List<Int> = emptyList()) {
 
 @Preview
 @Composable
-fun SelectionSortPreview() {
+fun BubbleSortPreview() {
     Column {
-        SelectionSort()
+        BubbleSort()
     }
 }

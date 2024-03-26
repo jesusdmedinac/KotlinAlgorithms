@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,7 +27,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.random.Random
 
 @Composable
 fun KotlinAlgorithmsApp() {
@@ -34,8 +38,30 @@ fun KotlinAlgorithmsApp() {
         Column(
             modifier = Modifier.padding(paddingValues)
         ) {
-            InsertionSort()
-            SelectionSort()
+            var initialList by remember {
+                mutableStateOf(emptyList<Int>())
+            }
+            if (initialList.isEmpty()) {
+                CircularProgressIndicator()
+            } else {
+                InsertionSort(initialList)
+                SelectionSort(initialList.map { it * 10 })
+                BubbleSort(initialList.map { it * 100 })
+            }
+            LaunchedEffect(Unit) {
+                launch {
+                    val maxNumber = 10
+                    val list = mutableListOf<Int>()
+                    repeat((1..maxNumber).count()) {
+                        var random: Int
+                        do {
+                            random = Random.nextInt(1, maxNumber + 1)
+                        } while (random in list)
+                        list.add(random)
+                    }
+                    initialList = list
+                }
+            }
         }
     }
 }
